@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="ChooseLanguage" xml:space="preserve">
+    <value>🌍 Оберіть мову / Choose language / Wybierz język / Выберите язык:</value>
+  </data>
+  <data name="EnterFirstName" xml:space="preserve">
+    <value>✍️ Wprowadź swoje imię:</value>
+  </data>
+  <data name="EnterLastName" xml:space="preserve">
+    <value>✍️ Wprowadź swoje nazwisko:</value>
+  </data>
+  <data name="RegistrationComplete" xml:space="preserve">
+    <value>✅ Rejestracja zakończona! Witaj, {0} {1}!</value>
+  </data>
+  <data name="Welcome" xml:space="preserve">
+    <value>👋 Witaj, {0}!
+
+🚖 Skontaktowałeś się z obsługą TaxiUA.
+
+Wybierz co Cię interesuje:</value>
+  </data>
+  <data name="ChooseProblemType" xml:space="preserve">
+    <value>📋 Wybierz typ zgłoszenia:</value>
+  </data>
+  <data name="EnterDescription" xml:space="preserve">
+    <value>✅ Temat: {0}
+
+✍️ Opisz swój problem szczegółowo:</value>
+  </data>
+  <data name="RequestAccepted" xml:space="preserve">
+    <value>⏳ Twoje zgłoszenie zostało przyjęte. Czekaj na operatora.</value>
+  </data>
+  <data name="OperatorConnected" xml:space="preserve">
+    <value>✅ Operator {0} dołączył do czatu.</value>
+  </data>
+  <data name="ChatEndedByOperator" xml:space="preserve">
+    <value>✅ Operator zakończył czat. Dziękujemy za kontakt! 🚖</value>
+  </data>
+  <data name="ChatEndedByUser" xml:space="preserve">
+    <value>✅ Czat zakończony. Dziękujemy za kontakt! 🚖</value>
+  </data>
+  <data name="Contacts" xml:space="preserve">
+    <value>📞 *Kontakty*
+
+📱 Telefon: +380 XX XXX XX XX
+📧 Email: support@taxi.ua
+🕐 Godziny pracy: 08:00 – 22:00</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>🚖 *O nas*
+
+Jesteśmy niezawodną firmą taksówkową działającą od 2015 roku.
+Naszym celem jest Twój komfort i bezpieczeństwo na drodze.</value>
+  </data>
+  <data name="LanguageChanged" xml:space="preserve">
+    <value>✅ Język zmieniony na Polski</value>
+  </data>
+  <data name="UseMenuOrStart" xml:space="preserve">
+    <value>Użyj menu poniżej lub naciśnij /start</value>
+  </data>
+  <data name="NotInChat" xml:space="preserve">
+    <value>Nie jesteś połączony z żadnym operatorem.</value>
+  </data>
+  <data name="ProblemAccident" xml:space="preserve">
+    <value>🚗 Wypadek</value>
+  </data>
+  <data name="ProblemLateDriver" xml:space="preserve">
+    <value>⏰ Kierowca się spóźnia</value>
+  </data>
+  <data name="ProblemWrongRoute" xml:space="preserve">
+    <value>🗺️ Zła trasa</value>
+  </data>
+  <data name="ProblemPaymentIssue" xml:space="preserve">
+    <value>💳 Problem z płatnością</value>
+  </data>
+  <data name="ProblemDriverBehavior" xml:space="preserve">
+    <value>😤 Zachowanie kierowcy</value>
+  </data>
+  <data name="ProblemOther" xml:space="preserve">
+    <value>💬 Inne</value>
+  </data>
+  <data name="BtnWriteManager" xml:space="preserve">
+    <value>📋 Napisz do managera</value>
+  </data>
+  <data name="BtnContacts" xml:space="preserve">
+    <value>📞 Kontakty</value>
+  </data>
+  <data name="BtnAbout" xml:space="preserve">
+    <value>ℹ️ O nas</value>
+  </data>
+  <data name="BtnEndChat" xml:space="preserve">
+    <value>❌ Zakończ czat</value>
+  </data>
+  <data name="BtnMainMenu" xml:space="preserve">
+    <value>🏠 Menu główne</value>
+  </data>
+  <data name="BtnChangeLanguage" xml:space="preserve">
+    <value>🌍 Zmień język</value>
+  </data>
+  <data name="ChatStarted" xml:space="preserve">
+    <value>✅ Twoje zgłoszenie zostało wysłane do operatora. Czekaj na odpowiedź lub naciśnij przycisk poniżej, aby zakończyć czat.</value>
+  </data>
+  <data name="OperatorMessageFormat" xml:space="preserve">
+    <value>👨‍💼 *{0}:* {1}</value>
+  </data>
+  <data name="AllOperatorsBusy" xml:space="preserve">
+    <value>😔 Wszyscy operatorzy są teraz zajęci. Twoje zgłoszenie zostało zarejestrowane, operator skontaktuje się wkrótce.</value>
+  </data>
+</root>

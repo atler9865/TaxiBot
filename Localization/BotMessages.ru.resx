@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="ChooseLanguage" xml:space="preserve">
+    <value>🌍 Оберіть мову / Choose language / Wybierz język / Выберите язык:</value>
+  </data>
+  <data name="EnterFirstName" xml:space="preserve">
+    <value>✍️ Введите ваше имя:</value>
+  </data>
+  <data name="EnterLastName" xml:space="preserve">
+    <value>✍️ Введите вашу фамилию:</value>
+  </data>
+  <data name="RegistrationComplete" xml:space="preserve">
+    <value>✅ Регистрация завершена! Добро пожаловать, {0} {1}!</value>
+  </data>
+  <data name="Welcome" xml:space="preserve">
+    <value>👋 Приветствуем, {0}!
+
+🚖 Вы обратились в службу поддержки TaxiUA.
+
+Выберите, что вас интересует:</value>
+  </data>
+  <data name="ChooseProblemType" xml:space="preserve">
+    <value>📋 Выберите тип обращения:</value>
+  </data>
+  <data name="EnterDescription" xml:space="preserve">
+    <value>✅ Тема: {0}
+
+✍️ Опишите вашу проблему подробно:</value>
+  </data>
+  <data name="RequestAccepted" xml:space="preserve">
+    <value>⏳ Ваш запрос принят. Ожидайте оператора.</value>
+  </data>
+  <data name="OperatorConnected" xml:space="preserve">
+    <value>✅ Оператор {0} подключился к чату.</value>
+  </data>
+  <data name="ChatEndedByOperator" xml:space="preserve">
+    <value>✅ Оператор завершил чат. Спасибо за обращение! 🚖</value>
+  </data>
+  <data name="ChatEndedByUser" xml:space="preserve">
+    <value>✅ Чат завершён. Спасибо за обращение! 🚖</value>
+  </data>
+  <data name="Contacts" xml:space="preserve">
+    <value>📞 *Контакты службы поддержки*
+
+📱 Телефон: +380 XX XXX XX XX
+📧 Email: support@taxi.ua
+🕐 Время работы: 08:00 – 22:00</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>🚖 *О нас*
+
+Мы — надёжный такси-сервис, работающий с 2015 года.
+Наша цель — ваш комфорт и безопасность на дороге.</value>
+  </data>
+  <data name="LanguageChanged" xml:space="preserve">
+    <value>✅ Язык изменён на Русский</value>
+  </data>
+  <data name="UseMenuOrStart" xml:space="preserve">
+    <value>Воспользуйтесь меню ниже или нажмите /start</value>
+  </data>
+  <data name="NotInChat" xml:space="preserve">
+    <value>Вы не подключены ни к одному оператору.</value>
+  </data>
+  <data name="ProblemAccident" xml:space="preserve">
+    <value>🚗 Авария</value>
+  </data>
+  <data name="ProblemLateDriver" xml:space="preserve">
+    <value>⏰ Водитель опаздывает</value>
+  </data>
+  <data name="ProblemWrongRoute" xml:space="preserve">
+    <value>🗺️ Неверный маршрут</value>
+  </data>
+  <data name="ProblemPaymentIssue" xml:space="preserve">
+    <value>💳 Проблема с оплатой</value>
+  </data>
+  <data name="ProblemDriverBehavior" xml:space="preserve">
+    <value>😤 Поведение водителя</value>
+  </data>
+  <data name="ProblemOther" xml:space="preserve">
+    <value>💬 Другое</value>
+  </data>
+  <data name="BtnWriteManager" xml:space="preserve">
+    <value>📋 Написать менеджеру</value>
+  </data>
+  <data name="BtnContacts" xml:space="preserve">
+    <value>📞 Контакты</value>
+  </data>
+  <data name="BtnAbout" xml:space="preserve">
+    <value>ℹ️ О нас</value>
+  </data>
+  <data name="BtnEndChat" xml:space="preserve">
+    <value>❌ Завершить чат</value>
+  </data>
+  <data name="BtnMainMenu" xml:space="preserve">
+    <value>🏠 Главное меню</value>
+  </data>
+  <data name="BtnChangeLanguage" xml:space="preserve">
+    <value>🌍 Изменить язык</value>
+  </data>
+  <data name="ChatStarted" xml:space="preserve">
+    <value>✅ Ваш запрос передан оператору. Ожидайте ответа или нажмите кнопку ниже, чтобы завершить чат.</value>
+  </data>
+  <data name="OperatorMessageFormat" xml:space="preserve">
+    <value>👨‍💼 *{0}:* {1}</value>
+  </data>
+  <data name="AllOperatorsBusy" xml:space="preserve">
+    <value>😔 Все операторы сейчас заняты. Ваш запрос зарегистрирован, оператор свяжется с вами в ближайшее время.</value>
+  </data>
+</root>

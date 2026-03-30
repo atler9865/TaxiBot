@@ -1,0 +1,32 @@
+services:
+  taxibot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      # SQLite — stored in the mounted volume
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/taxibot.db
+      # Backup directory
+      - BackupDirectory=/app/backups
+      # JWT — override in production with a strong secret
+      - Jwt__Key=TaxiBot-Super-Secret-Key-2026-MinimumThirtyTwoCharacters!
+      - Jwt__Issuer=TaxiBot
+      - Jwt__Audience=TaxiBot
+      - Jwt__ExpiryHours=24
+      # Telegram bot token — set via .env file or shell export
+      - BotToken=${TELEGRAM_BOT_TOKEN}
+      # Seed admin credentials
+      - SeedAdmin__Login=${ADMIN_LOGIN:-admin}
+      - SeedAdmin__Password=${ADMIN_PASSWORD:-admin123}
+      - SeedAdmin__FirstName=${ADMIN_FIRST_NAME:-Admin}
+      - SeedAdmin__LastName=${ADMIN_LAST_NAME:-TaxiBot}
+    volumes:
+      - taxibot-data:/app/data
+      - taxibot-backups:/app/backups
+    restart: unless-stopped
+
+volumes:
+  taxibot-data:
+  taxibot-backups:

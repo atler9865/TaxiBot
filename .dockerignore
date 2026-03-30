@@ -1,0 +1,15 @@
+**/.git
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/node_modules
+**/*.user
+**/*.dbmdl
+**/*.jfm
+**/npm-debug.log
+wwwroot
+backups
+*.db
+*.db-shm
+*.db-wal
