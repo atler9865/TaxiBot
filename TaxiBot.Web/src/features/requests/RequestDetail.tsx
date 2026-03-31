@@ -10,6 +10,7 @@ import { joinRequest, leaveRequest } from '@/services/signalr'
 
 interface Props {
   requestId: number
+  onClose: () => void
 }
 
 const PROBLEM_LABELS: Record<string, string> = {
@@ -21,7 +22,7 @@ const PROBLEM_LABELS: Record<string, string> = {
   Other: '💬 Other',
 }
 
-export default function RequestDetail({ requestId }: Props) {
+export default function RequestDetail({ requestId, onClose }: Props) {
   const dispatch = useAppDispatch()
   const operator = useAppSelector((s) => s.auth.operator)
   const { selectedRequestDetail, isDetailLoading } = useAppSelector((s) => s.requests)
@@ -120,6 +121,13 @@ export default function RequestDetail({ requestId }: Props) {
               Complete Request
             </button>
           )}
+          <button
+            onClick={onClose}
+            className="ml-1 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            title="Close"
+          >
+            ✕
+          </button>
         </div>
       </div>
 

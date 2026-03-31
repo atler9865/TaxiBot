@@ -137,7 +137,13 @@ const requestsSlice = createSlice({
   reducers: {
     setSelectedRequest(state, action: PayloadAction<number | null>) {
       state.selectedRequestId = action.payload
-      if (action.payload === null) state.selectedRequestDetail = null
+      if (action.payload === null) {
+        state.selectedRequestDetail = null
+        state.isDetailLoading = false
+      } else if (action.payload !== state.selectedRequestDetail?.id) {
+        state.selectedRequestDetail = null
+        state.isDetailLoading = true
+      }
     },
     // SignalR events
     requestCreated(state, action: PayloadAction<Request>) {

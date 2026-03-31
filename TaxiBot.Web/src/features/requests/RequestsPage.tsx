@@ -80,7 +80,6 @@ export default function RequestsPage() {
   const handleTabChange = (tab: RequestStatus) => {
     setActiveTab(tab)
     doFetch(tab, 1, filters)
-    dispatch(setSelectedRequest(null))
   }
 
   const handleFilterChange = (next: Filters) => {
@@ -178,7 +177,7 @@ export default function RequestsPage() {
       <div className="flex gap-4 flex-1 min-h-0">
 
         {/* Left panel — list */}
-        <div className="w-80 flex flex-col bg-white rounded-xl shadow-sm overflow-hidden flex-shrink-0">
+        <div className={`${selectedId ? 'w-80 flex-shrink-0' : 'flex-1'} flex flex-col bg-white rounded-xl shadow-sm overflow-hidden`}>
 
           {/* Tabs */}
           <div className="flex border-b border-gray-100 flex-shrink-0">
@@ -246,15 +245,14 @@ export default function RequestsPage() {
         </div>
 
         {/* Right panel — detail */}
-        <div className="flex-1 bg-white rounded-xl shadow-sm overflow-hidden min-h-0">
-          {selectedId ? (
-            <RequestDetail requestId={selectedId} />
-          ) : (
-            <div className="h-full flex items-center justify-center text-gray-400 text-sm">
-              Select a request to view details
-            </div>
-          )}
-        </div>
+        {selectedId && (
+          <div className="flex-1 bg-white rounded-xl shadow-sm overflow-hidden min-h-0">
+            <RequestDetail
+              requestId={selectedId}
+              onClose={() => dispatch(setSelectedRequest(null))}
+            />
+          </div>
+        )}
 
       </div>
     </div>
