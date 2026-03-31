@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { fetchDrivers } from './driversSlice'
 import EditDriverModal from './EditDriverModal'
-import type { TelegramUser } from '@/types'
+import type { DriverStatus, TelegramUser } from '@/types'
 
 const LANGUAGE_LABELS: Record<string, string> = {
   uk: '🇺🇦 UK',
@@ -20,9 +20,7 @@ function DriverRowMenu({ driver, onEdit }: { driver: TelegramUser; onEdit: (d: T
     if (!pos) return
     const handler = (e: MouseEvent) => {
       const target = e.target as Node
-      const insideBtn = btnRef.current?.contains(target)
-      const insideDropdown = dropdownRef.current?.contains(target)
-      if (!insideBtn && !insideDropdown) setPos(null)
+      if (!btnRef.current?.contains(target) && !dropdownRef.current?.contains(target)) setPos(null)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
@@ -73,28 +71,88 @@ export default function DriversPage() {
   const [editDriver, setEditDriver] = useState<TelegramUser | null>(null)
   const isAdmin = operator?.role === 'Administrator'
 
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<DriverStatus | ''>('')
+  const [langFilter, setLangFilter] = useState('')
+
   useEffect(() => {
     dispatch(fetchDrivers())
   }, [dispatch])
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase()
+    return list.filter((u) => {
+      if (q && !`${u.firstName} ${u.lastName} ${u.username ?? ''}`.toLowerCase().includes(q)) return false
+      if (statusFilter && u.driverStatus !== statusFilter) return false
+      if (langFilter && u.language !== langFilter) return false
+      return true
+    })
+  }, [list, search, statusFilter, langFilter])
+
+  const hasFilters = search !== '' || statusFilter !== '' || langFilter !== ''
 
   const handleEditClose = () => {
     setEditDriver(null)
     dispatch(fetchDrivers())
   }
 
+  const selectCls = 'border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700'
+
   return (
     <>
       {editDriver && <EditDriverModal driver={editDriver} onClose={handleEditClose} />}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+
+        {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100">
           <h1 className="text-lg font-semibold text-gray-800">Drivers</h1>
-          <p className="text-sm text-gray-400 mt-0.5">{list.length} registered</p>
+          <p className="text-sm text-gray-400 mt-0.5">
+            {hasFilters ? `${filtered.length} of ${list.length}` : `${list.length} registered`}
+          </p>
+        </div>
+
+        {/* Filters */}
+        <div className="px-6 py-3 border-b border-gray-100 flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-48">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="6.5" cy="6.5" r="5" />
+              <line x1="10.5" y1="10.5" x2="14" y2="14" />
+            </svg>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name or username..."
+              className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as DriverStatus | '')} className={selectCls}>
+            <option value="">All statuses</option>
+            <option value="None">Active</option>
+            <option value="Blocked">Blocked</option>
+          </select>
+          <select value={langFilter} onChange={(e) => setLangFilter(e.target.value)} className={selectCls}>
+            <option value="">All languages</option>
+            <option value="uk">🇺🇦 UK</option>
+            <option value="en">🇬🇧 EN</option>
+            <option value="pl">🇵🇱 PL</option>
+            <option value="ru">🇷🇺 RU</option>
+          </select>
+          {hasFilters && (
+            <button
+              onClick={() => { setSearch(''); setStatusFilter(''); setLangFilter('') }}
+              className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              Clear
+            </button>
+          )}
         </div>
 
         {isLoading ? (
           <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
-        ) : list.length === 0 ? (
-          <div className="p-8 text-center text-gray-400 text-sm">No drivers registered yet</div>
+        ) : filtered.length === 0 ? (
+          <div className="p-8 text-center text-gray-400 text-sm">
+            {hasFilters ? 'No drivers match the filters' : 'No drivers registered yet'}
+          </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -109,7 +167,7 @@ export default function DriversPage() {
               </tr>
             </thead>
             <tbody>
-              {list.map((user) => (
+              {filtered.map((user) => (
                 <tr key={user.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-3 font-medium text-gray-800">
                     {user.firstName} {user.lastName}

@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { fetchOperators } from './operatorsSlice'
 import AddUserModal from './AddUserModal'
 import EditUserModal from './EditUserModal'
-import type { Operator, UserStatus } from '@/types'
+import type { Operator, OperatorRole, UserStatus } from '@/types'
 
 const STATUS_STYLES: Record<UserStatus, { dot: string; badge: string; label: string }> = {
   Available:    { dot: 'bg-green-500',  badge: 'bg-green-50 text-green-700',   label: 'Available' },
@@ -31,9 +31,7 @@ function RowMenu({ operator, onEdit }: { operator: Operator; onEdit: (op: Operat
     if (!pos) return
     const handler = (e: MouseEvent) => {
       const target = e.target as Node
-      const insideBtn = btnRef.current?.contains(target)
-      const insideDropdown = dropdownRef.current?.contains(target)
-      if (!insideBtn && !insideDropdown) setPos(null)
+      if (!btnRef.current?.contains(target) && !dropdownRef.current?.contains(target)) setPos(null)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
@@ -83,77 +81,135 @@ export default function UsersPage() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editOperator, setEditOperator] = useState<Operator | null>(null)
 
+  const [search, setSearch] = useState('')
+  const [roleFilter, setRoleFilter] = useState<OperatorRole | ''>('')
+  const [statusFilter, setStatusFilter] = useState<UserStatus | ''>('')
+
   useEffect(() => {
     dispatch(fetchOperators())
   }, [dispatch])
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase()
+    return list.filter((op) => {
+      if (q && !`${op.firstName} ${op.lastName} ${op.login}`.toLowerCase().includes(q)) return false
+      if (roleFilter && op.role !== roleFilter) return false
+      if (statusFilter && op.status !== statusFilter) return false
+      return true
+    })
+  }, [list, search, roleFilter, statusFilter])
+
+  const hasFilters = search !== '' || roleFilter !== '' || statusFilter !== ''
 
   const handleEditClose = () => {
     setEditOperator(null)
     dispatch(fetchOperators())
   }
 
+  const selectCls = 'border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-700'
+
   return (
     <>
-    {showAddModal && <AddUserModal onClose={() => setShowAddModal(false)} />}
-    {editOperator && <EditUserModal operator={editOperator} onClose={handleEditClose} />}
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-gray-800">Users</h1>
-          <p className="text-sm text-gray-400 mt-0.5">{list.length} total</p>
-        </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-        >
-          <span className="text-base leading-none">+</span>
-          Add User
-        </button>
-      </div>
+      {showAddModal && <AddUserModal onClose={() => setShowAddModal(false)} />}
+      {editOperator && <EditUserModal operator={editOperator} onClose={handleEditClose} />}
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
 
-      {isLoading ? (
-        <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
-      ) : list.length === 0 ? (
-        <div className="p-8 text-center text-gray-400 text-sm">No users found</div>
-      ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-100 text-left text-gray-400 font-medium">
-              <th className="px-6 py-3">Name</th>
-              <th className="px-6 py-3">Login</th>
-              <th className="px-6 py-3">Role</th>
-              <th className="px-6 py-3">Status</th>
-              <th className="px-6 py-3" />
-            </tr>
-          </thead>
-          <tbody>
-            {list.map((op) => (
-              <tr key={op.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-3 font-medium text-gray-800">
-                  {op.firstName} {op.lastName}
-                </td>
-                <td className="px-6 py-3 text-gray-500">{op.login}</td>
-                <td className="px-6 py-3">
-                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                    op.role === 'Administrator'
-                      ? 'bg-purple-50 text-purple-700'
-                      : 'bg-blue-50 text-blue-700'
-                  }`}>
-                    {op.role}
-                  </span>
-                </td>
-                <td className="px-6 py-3">
-                  <StatusBadge status={op.status} />
-                </td>
-                <td className="px-6 py-3 text-right">
-                  <RowMenu operator={op} onEdit={setEditOperator} />
-                </td>
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h1 className="text-lg font-semibold text-gray-800">Users</h1>
+            <p className="text-sm text-gray-400 mt-0.5">
+              {hasFilters ? `${filtered.length} of ${list.length}` : `${list.length} total`}
+            </p>
+          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+          >
+            <span className="text-base leading-none">+</span>
+            Add User
+          </button>
+        </div>
+
+        {/* Filters */}
+        <div className="px-6 py-3 border-b border-gray-100 flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-48">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="6.5" cy="6.5" r="5" />
+              <line x1="10.5" y1="10.5" x2="14" y2="14" />
+            </svg>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name or login..."
+              className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value as OperatorRole | '')} className={selectCls}>
+            <option value="">All roles</option>
+            <option value="Operator">Operator</option>
+            <option value="Administrator">Administrator</option>
+          </select>
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as UserStatus | '')} className={selectCls}>
+            <option value="">All statuses</option>
+            <option value="Available">Available</option>
+            <option value="NotAvailable">Not Available</option>
+            <option value="Blocked">Blocked</option>
+            <option value="InVacation">On Vacation</option>
+          </select>
+          {hasFilters && (
+            <button
+              onClick={() => { setSearch(''); setRoleFilter(''); setStatusFilter('') }}
+              className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        {isLoading ? (
+          <div className="p-8 text-center text-gray-400 text-sm">Loading...</div>
+        ) : filtered.length === 0 ? (
+          <div className="p-8 text-center text-gray-400 text-sm">
+            {hasFilters ? 'No users match the filters' : 'No users found'}
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100 text-left text-gray-400 font-medium">
+                <th className="px-6 py-3">Name</th>
+                <th className="px-6 py-3">Login</th>
+                <th className="px-6 py-3">Role</th>
+                <th className="px-6 py-3">Status</th>
+                <th className="px-6 py-3" />
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+            </thead>
+            <tbody>
+              {filtered.map((op) => (
+                <tr key={op.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-3 font-medium text-gray-800">
+                    {op.firstName} {op.lastName}
+                  </td>
+                  <td className="px-6 py-3 text-gray-500">{op.login}</td>
+                  <td className="px-6 py-3">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                      op.role === 'Administrator' ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'
+                    }`}>
+                      {op.role}
+                    </span>
+                  </td>
+                  <td className="px-6 py-3">
+                    <StatusBadge status={op.status} />
+                  </td>
+                  <td className="px-6 py-3 text-right">
+                    <RowMenu operator={op} onEdit={setEditOperator} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </>
   )
 }
