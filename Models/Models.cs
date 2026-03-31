@@ -14,6 +14,12 @@ public enum UserStatus
     InVacation = 4
 }
 
+public enum DriverStatus
+{
+    None = 0,
+    Blocked = 1
+}
+
 public enum UserState
 {
     WaitingForLanguage,

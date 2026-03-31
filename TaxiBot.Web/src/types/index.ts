@@ -62,6 +62,8 @@ export interface UnassignedCountDto {
   count: number
 }
 
+export type DriverStatus = 'None' | 'Blocked'
+
 export interface TelegramUser {
   id: number
   chatId: number
@@ -72,4 +74,5 @@ export interface TelegramUser {
   isRegistered: boolean
   registeredAt: string
   requestsCount: number
+  driverStatus: DriverStatus
 }

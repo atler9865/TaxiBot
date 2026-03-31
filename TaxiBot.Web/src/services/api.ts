@@ -79,4 +79,7 @@ export const updateOperator = (id: number, data: {
 export const getDrivers = () =>
   api.get<TelegramUser[]>('/drivers').then((r) => r.data)
 
+export const updateDriver = (id: number, driverStatus: string) =>
+  api.put<TelegramUser>(`/drivers/${id}`, { driverStatus }).then((r) => r.data)
+
 export default api

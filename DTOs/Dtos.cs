@@ -59,7 +59,9 @@ public record TelegramUserDto(
     string FirstName, string LastName,
     string? Username, string Language,
     bool IsRegistered, DateTime RegisteredAt,
-    int RequestsCount);
+    int RequestsCount, string DriverStatus);
+
+public record UpdateDriverRequest(string DriverStatus);
 
 // ── Misc ──────────────────────────────────────────────────────────────────────
 
