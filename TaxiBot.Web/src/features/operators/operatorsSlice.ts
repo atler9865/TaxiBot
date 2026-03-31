@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { getOperators, createOperator } from '@/services/api'
+import { getOperators, createOperator, updateOperator } from '@/services/api'
 import type { Operator, OperatorRole } from '@/types'
 
 interface OperatorsState {
@@ -7,6 +7,8 @@ interface OperatorsState {
   isLoading: boolean
   isCreating: boolean
   createError: string | null
+  isUpdating: boolean
+  updateError: string | null
 }
 
 const initialState: OperatorsState = {
@@ -14,6 +16,8 @@ const initialState: OperatorsState = {
   isLoading: false,
   isCreating: false,
   createError: null,
+  isUpdating: false,
+  updateError: null,
 }
 
 export const fetchOperators = createAsyncThunk('operators/fetchAll', async () => {
@@ -36,12 +40,31 @@ export const createUserThunk = createAsyncThunk(
   }
 )
 
+export const updateUserThunk = createAsyncThunk(
+  'operators/update',
+  async (
+    { id, data }: { id: number; data: { login: string; firstName: string; lastName: string; role: OperatorRole; password?: string } },
+    { rejectWithValue }
+  ) => {
+    try {
+      return await updateOperator(id, data)
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })
+        ?.response?.data?.message ?? 'Failed to update user'
+      return rejectWithValue(msg)
+    }
+  }
+)
+
 const operatorsSlice = createSlice({
   name: 'operators',
   initialState,
   reducers: {
     clearCreateError(state) {
       state.createError = null
+    },
+    clearUpdateError(state) {
+      state.updateError = null
     },
   },
   extraReducers: (builder) => {
@@ -64,8 +87,21 @@ const operatorsSlice = createSlice({
         state.isCreating = false
         state.createError = action.payload as string
       })
+      .addCase(updateUserThunk.pending, (state) => {
+        state.isUpdating = true
+        state.updateError = null
+      })
+      .addCase(updateUserThunk.fulfilled, (state, action) => {
+        state.isUpdating = false
+        const idx = state.list.findIndex((o) => o.id === action.payload.id)
+        if (idx !== -1) state.list[idx] = action.payload
+      })
+      .addCase(updateUserThunk.rejected, (state, action) => {
+        state.isUpdating = false
+        state.updateError = action.payload as string
+      })
   },
 })
 
-export const { clearCreateError } = operatorsSlice.actions
+export const { clearCreateError, clearUpdateError } = operatorsSlice.actions
 export default operatorsSlice.reducer

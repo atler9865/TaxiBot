@@ -66,6 +66,14 @@ export const createOperator = (data: {
   role: string
 }) => api.post<Operator>('/operators', data).then((r) => r.data)
 
+export const updateOperator = (id: number, data: {
+  login: string
+  firstName: string
+  lastName: string
+  role: string
+  password?: string
+}) => api.put<Operator>(`/operators/${id}`, data).then((r) => r.data)
+
 // Drivers
 export const getDrivers = () =>
   api.get<TelegramUser[]>('/drivers').then((r) => r.data)

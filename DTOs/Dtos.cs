@@ -12,6 +12,8 @@ public record OperatorDto(int Id, string Login, string FirstName, string LastNam
 
 public record CreateUserRequest(string Login, string Password, string FirstName, string LastName, string Role);
 
+public record UpdateUserRequest(string Login, string FirstName, string LastName, string Role, string? Password);
+
 // ── Requests ──────────────────────────────────────────────────────────────────
 
 public class RequestDto

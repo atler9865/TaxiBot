@@ -53,4 +53,33 @@ public class OperatorsController(AppDbContext db) : ControllerBase
 
         return Ok(new OperatorDto(user.Id, user.Login, user.FirstName, user.LastName, user.IsAvailable, user.Role.ToString()));
     }
+
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<OperatorDto>> UpdateUser(
+        int id, [FromBody] UpdateUserRequest request, CancellationToken ct)
+    {
+        var user = await db.AppUsers.FindAsync([id], ct);
+        if (user is null) return NotFound(new { message = "User not found" });
+
+        if (await db.AppUsers.AnyAsync(o => o.Login == request.Login && o.Id != id, ct))
+            return Conflict(new { message = "Login already taken" });
+
+        if (!Enum.TryParse<OperatorRole>(request.Role, out var role))
+            return BadRequest(new { message = "Invalid role" });
+
+        user.Login = request.Login;
+        user.FirstName = request.FirstName;
+        user.LastName = request.LastName;
+        user.Role = role;
+
+        if (!string.IsNullOrWhiteSpace(request.Password))
+        {
+            var hasher = new PasswordHasher<AppUser>();
+            user.PasswordHash = hasher.HashPassword(user, request.Password);
+        }
+
+        await db.SaveChangesAsync(ct);
+
+        return Ok(new OperatorDto(user.Id, user.Login, user.FirstName, user.LastName, user.IsAvailable, user.Role.ToString()));
+    }
 }

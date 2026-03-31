@@ -1,20 +1,84 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { fetchOperators } from './operatorsSlice'
 import AddUserModal from './AddUserModal'
+import EditUserModal from './EditUserModal'
+import type { Operator } from '@/types'
+
+function RowMenu({ operator, onEdit }: { operator: Operator; onEdit: (op: Operator) => void }) {
+  const [pos, setPos] = useState<{ top: number; right: number } | null>(null)
+  const btnRef = useRef<HTMLButtonElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!pos) return
+    const handler = (e: MouseEvent) => {
+      const target = e.target as Node
+      const insideBtn = btnRef.current?.contains(target)
+      const insideDropdown = dropdownRef.current?.contains(target)
+      if (!insideBtn && !insideDropdown) setPos(null)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [pos])
+
+  const handleOpen = () => {
+    if (!btnRef.current) return
+    const rect = btnRef.current.getBoundingClientRect()
+    setPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right })
+  }
+
+  return (
+    <div className="inline-block">
+      <button
+        ref={btnRef}
+        onClick={pos ? () => setPos(null) : handleOpen}
+        className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+        aria-label="Actions"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <circle cx="8" cy="3" r="1.5" />
+          <circle cx="8" cy="8" r="1.5" />
+          <circle cx="8" cy="13" r="1.5" />
+        </svg>
+      </button>
+      {pos && (
+        <div
+          ref={dropdownRef}
+          style={{ position: 'fixed', top: pos.top, right: pos.right, zIndex: 9999 }}
+          className="w-36 bg-white border border-gray-100 rounded-lg shadow-lg py-1"
+        >
+          <button
+            onClick={() => { setPos(null); onEdit(operator) }}
+            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Edit
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function UsersPage() {
   const dispatch = useAppDispatch()
   const { list, isLoading } = useAppSelector((s) => s.operators)
-  const [showModal, setShowModal] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [editOperator, setEditOperator] = useState<Operator | null>(null)
 
   useEffect(() => {
     dispatch(fetchOperators())
   }, [dispatch])
 
+  const handleEditClose = () => {
+    setEditOperator(null)
+    dispatch(fetchOperators())
+  }
+
   return (
     <>
-    {showModal && <AddUserModal onClose={() => setShowModal(false)} />}
+    {showAddModal && <AddUserModal onClose={() => setShowAddModal(false)} />}
+    {editOperator && <EditUserModal operator={editOperator} onClose={handleEditClose} />}
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
         <div>
@@ -22,7 +86,7 @@ export default function UsersPage() {
           <p className="text-sm text-gray-400 mt-0.5">{list.length} total</p>
         </div>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => setShowAddModal(true)}
           className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
         >
           <span className="text-base leading-none">+</span>
@@ -42,6 +106,7 @@ export default function UsersPage() {
               <th className="px-6 py-3">Login</th>
               <th className="px-6 py-3">Role</th>
               <th className="px-6 py-3">Status</th>
+              <th className="px-6 py-3" />
             </tr>
           </thead>
           <tbody>
@@ -69,6 +134,9 @@ export default function UsersPage() {
                     <span className={`w-1.5 h-1.5 rounded-full ${op.isAvailable ? 'bg-green-500' : 'bg-gray-400'}`} />
                     {op.isAvailable ? 'Available' : 'Busy'}
                   </span>
+                </td>
+                <td className="px-6 py-3 text-right">
+                  <RowMenu operator={op} onEdit={setEditOperator} />
                 </td>
               </tr>
             ))}
