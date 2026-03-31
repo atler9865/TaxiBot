@@ -1,28 +1,44 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import * as api from '@/services/api'
-import type { Request, RequestDetail, Message } from '@/types'
+import type { Request, RequestDetail, Message, RequestStatus, FetchRequestsParams, PagedResult } from '@/types'
+
+const PAGE_SIZE = 50
+
+// ── Per-tab state ─────────────────────────────────────────────────────────────
+
+interface TabState {
+  items: Request[]
+  page: number
+  totalCount: number
+  totalPages: number
+  isLoading: boolean
+}
+
+function emptyTab(): TabState {
+  return { items: [], page: 1, totalCount: 0, totalPages: 0, isLoading: false }
+}
+
+// ── Root state ────────────────────────────────────────────────────────────────
 
 export interface RequestsState {
-  newRequests: Request[]
-  inProgressRequests: Request[]
-  completedRequests: Request[]
+  tabs: Record<RequestStatus, TabState>
   selectedRequestId: number | null
   selectedRequestDetail: RequestDetail | null
   messages: Record<number, Message[]>
   unassignedCount: number
-  isLoading: boolean
   isDetailLoading: boolean
 }
 
 const initialState: RequestsState = {
-  newRequests: [],
-  inProgressRequests: [],
-  completedRequests: [],
+  tabs: {
+    New: emptyTab(),
+    InProgress: emptyTab(),
+    Completed: emptyTab(),
+  },
   selectedRequestId: null,
   selectedRequestDetail: null,
   messages: {},
   unassignedCount: 0,
-  isLoading: false,
   isDetailLoading: false,
 }
 
@@ -30,9 +46,10 @@ const initialState: RequestsState = {
 
 export const fetchRequests = createAsyncThunk(
   'requests/fetchAll',
-  async (status: string | undefined, { rejectWithValue }) => {
+  async (params: FetchRequestsParams, { rejectWithValue }) => {
     try {
-      return await api.getRequests(status)
+      const result: PagedResult<Request> = await api.getRequests(params)
+      return { result, status: params.status }
     } catch {
       return rejectWithValue('Failed to load requests')
     }
@@ -93,10 +110,23 @@ export const fetchUnassignedCount = createAsyncThunk(
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function removeFromAll(state: RequestsState, id: number) {
-  state.newRequests = state.newRequests.filter((r) => r.id !== id)
-  state.inProgressRequests = state.inProgressRequests.filter((r) => r.id !== id)
-  state.completedRequests = state.completedRequests.filter((r) => r.id !== id)
+function removeFromTab(tab: TabState, id: number): boolean {
+  const idx = tab.items.findIndex((r) => r.id === id)
+  if (idx === -1) return false
+  tab.items.splice(idx, 1)
+  tab.totalCount = Math.max(0, tab.totalCount - 1)
+  tab.totalPages = Math.max(1, Math.ceil(tab.totalCount / PAGE_SIZE))
+  return true
+}
+
+function prependToTab(tab: TabState, item: Request) {
+  if (tab.items.some((r) => r.id === item.id)) return
+  tab.totalCount += 1
+  tab.totalPages = Math.max(1, Math.ceil(tab.totalCount / PAGE_SIZE))
+  if (tab.page === 1) {
+    tab.items.unshift(item)
+    if (tab.items.length > PAGE_SIZE) tab.items.pop()
+  }
 }
 
 // ── Slice ─────────────────────────────────────────────────────────────────────
@@ -111,38 +141,30 @@ const requestsSlice = createSlice({
     },
     // SignalR events
     requestCreated(state, action: PayloadAction<Request>) {
-      const exists = state.newRequests.some((r) => r.id === action.payload.id)
-      if (!exists) {
-        state.newRequests.unshift(action.payload)
-        state.unassignedCount += 1
-      }
+      prependToTab(state.tabs.New, action.payload)
+      state.unassignedCount += 1
     },
     requestAssigned(state, action: PayloadAction<Request>) {
-      removeFromAll(state, action.payload.id)
-      state.inProgressRequests.unshift(action.payload)
-      if (state.selectedRequestDetail?.id === action.payload.id) {
+      removeFromTab(state.tabs.New, action.payload.id)
+      prependToTab(state.tabs.InProgress, action.payload)
+      if (state.selectedRequestDetail?.id === action.payload.id)
         state.selectedRequestDetail = { ...state.selectedRequestDetail, ...action.payload }
-      }
     },
     requestCompleted(state, action: PayloadAction<Request>) {
-      removeFromAll(state, action.payload.id)
-      state.completedRequests.unshift(action.payload)
-      if (state.selectedRequestDetail?.id === action.payload.id) {
+      removeFromTab(state.tabs.New, action.payload.id)
+      removeFromTab(state.tabs.InProgress, action.payload.id)
+      prependToTab(state.tabs.Completed, action.payload)
+      if (state.selectedRequestDetail?.id === action.payload.id)
         state.selectedRequestDetail = { ...state.selectedRequestDetail, ...action.payload }
-      }
     },
     newMessage(state, action: PayloadAction<Message>) {
       const { requestId } = action.payload
       if (!state.messages[requestId]) state.messages[requestId] = []
-      const exists = state.messages[requestId].some((m) => m.id === action.payload.id)
-      if (!exists) state.messages[requestId].push(action.payload)
-
-      if (state.selectedRequestDetail?.id === requestId) {
-        const detailExists = state.selectedRequestDetail.messages.some(
-          (m) => m.id === action.payload.id
-        )
-        if (!detailExists) state.selectedRequestDetail.messages.push(action.payload)
-      }
+      if (!state.messages[requestId].some((m) => m.id === action.payload.id))
+        state.messages[requestId].push(action.payload)
+      if (state.selectedRequestDetail?.id === requestId &&
+          !state.selectedRequestDetail.messages.some((m) => m.id === action.payload.id))
+        state.selectedRequestDetail.messages.push(action.payload)
     },
     setUnassignedCount(state, action: PayloadAction<number>) {
       state.unassignedCount = action.payload
@@ -151,15 +173,24 @@ const requestsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // fetchRequests
-      .addCase(fetchRequests.pending, (state) => { state.isLoading = true })
-      .addCase(fetchRequests.fulfilled, (state, action) => {
-        state.isLoading = false
-        const reqs = action.payload
-        state.newRequests = reqs.filter((r) => r.status === 'New')
-        state.inProgressRequests = reqs.filter((r) => r.status === 'InProgress')
-        state.completedRequests = reqs.filter((r) => r.status === 'Completed')
+      .addCase(fetchRequests.pending, (state, action) => {
+        const status = action.meta.arg.status
+        if (status) state.tabs[status].isLoading = true
       })
-      .addCase(fetchRequests.rejected, (state) => { state.isLoading = false })
+      .addCase(fetchRequests.fulfilled, (state, action) => {
+        const { result, status } = action.payload
+        if (!status) return
+        const tab = state.tabs[status]
+        tab.isLoading = false
+        tab.items = result.items
+        tab.page = result.page
+        tab.totalCount = result.totalCount
+        tab.totalPages = result.totalPages
+      })
+      .addCase(fetchRequests.rejected, (state, action) => {
+        const status = action.meta.arg.status
+        if (status) state.tabs[status].isLoading = false
+      })
 
       // fetchRequestDetail
       .addCase(fetchRequestDetail.pending, (state) => { state.isDetailLoading = true })
@@ -173,16 +204,17 @@ const requestsSlice = createSlice({
 
       // assignRequest
       .addCase(assignRequestThunk.fulfilled, (state, action) => {
-        removeFromAll(state, action.payload.id)
-        state.inProgressRequests.unshift(action.payload)
+        removeFromTab(state.tabs.New, action.payload.id)
+        prependToTab(state.tabs.InProgress, action.payload)
         if (state.selectedRequestDetail?.id === action.payload.id)
           state.selectedRequestDetail = { ...state.selectedRequestDetail, ...action.payload }
       })
 
       // completeRequest
       .addCase(completeRequestThunk.fulfilled, (state, action) => {
-        removeFromAll(state, action.payload.id)
-        state.completedRequests.unshift(action.payload)
+        removeFromTab(state.tabs.New, action.payload.id)
+        removeFromTab(state.tabs.InProgress, action.payload.id)
+        prependToTab(state.tabs.Completed, action.payload)
         if (state.selectedRequestDetail?.id === action.payload.id)
           state.selectedRequestDetail = { ...state.selectedRequestDetail, ...action.payload }
       })

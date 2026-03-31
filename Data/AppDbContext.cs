@@ -15,6 +15,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<TelegramUser>()
             .HasIndex(u => u.ChatId).IsUnique();
 
+        modelBuilder.Entity<TelegramUser>()
+            .HasIndex(u => u.FullName);
+
         modelBuilder.Entity<AppUser>()
             .HasIndex(o => o.Login).IsUnique();
 

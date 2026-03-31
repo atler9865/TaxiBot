@@ -18,22 +18,60 @@ public class RequestsController(AppDbContext db, RequestService requestService) 
         int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
     [HttpGet]
-    public async Task<ActionResult<List<RequestDto>>> GetRequests(
-        [FromQuery] string? status, CancellationToken ct)
+    public async Task<ActionResult<PagedResult<RequestDto>>> GetRequests(
+        [FromQuery] RequestsQuery query, CancellationToken ct)
     {
-        var query = db.Requests
+        var q = db.Requests
             .Include(r => r.TelegramUser)
             .Include(r => r.AssignedOperator)
             .AsQueryable();
 
-        if (Enum.TryParse<RequestStatus>(status, true, out var s))
-            query = query.Where(r => r.Status == s);
+        if (Enum.TryParse<RequestStatus>(query.Status, true, out var s))
+            q = q.Where(r => r.Status == s);
 
-        var requests = await query
-            .OrderByDescending(r => r.CreatedAt)
+        if (query.OperatorId.HasValue)
+            q = q.Where(r => r.AssignedOperatorId == query.OperatorId.Value);
+
+        if (query.DriverId.HasValue)
+            q = q.Where(r => r.TelegramUserId == query.DriverId.Value);
+
+        if (query.DateFrom.HasValue)
+            q = q.Where(r => r.CreatedAt >= query.DateFrom.Value);
+
+        if (query.DateTo.HasValue)
+            q = q.Where(r => r.CreatedAt < query.DateTo.Value.AddDays(1));
+
+        q = query.SortBy.ToLower() switch
+        {
+            "assignedat"   => query.SortDesc ? q.OrderByDescending(r => r.AssignedAt)   : q.OrderBy(r => r.AssignedAt),
+            "completedat"  => query.SortDesc ? q.OrderByDescending(r => r.CompletedAt)  : q.OrderBy(r => r.CompletedAt),
+            "drivername"   => query.SortDesc
+                ? q.OrderByDescending(r => r.TelegramUser.FirstName).ThenByDescending(r => r.TelegramUser.LastName)
+                : q.OrderBy(r => r.TelegramUser.FirstName).ThenBy(r => r.TelegramUser.LastName),
+            "operatorname" => query.SortDesc
+                ? q.OrderByDescending(r => r.AssignedOperator!.FirstName).ThenByDescending(r => r.AssignedOperator!.LastName)
+                : q.OrderBy(r => r.AssignedOperator!.FirstName).ThenBy(r => r.AssignedOperator!.LastName),
+            _              => query.SortDesc ? q.OrderByDescending(r => r.CreatedAt)    : q.OrderBy(r => r.CreatedAt),
+        };
+
+        var totalCount = await q.CountAsync(ct);
+        var pageSize   = Math.Clamp(query.PageSize, 1, 100);
+        var page       = Math.Max(1, query.Page);
+        var totalPages = totalCount == 0 ? 1 : (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        var items = await q
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(ct);
 
-        return Ok(requests.Select(RequestService.MapToDto));
+        return Ok(new PagedResult<RequestDto>
+        {
+            Items      = items.Select(RequestService.MapToDto).ToList(),
+            TotalCount = totalCount,
+            Page       = page,
+            PageSize   = pageSize,
+            TotalPages = totalPages,
+        });
     }
 
     [HttpGet("{id:int}")]

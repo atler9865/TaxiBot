@@ -8,6 +8,8 @@ import type {
   Message,
   UnassignedCountDto,
   TelegramUser,
+  FetchRequestsParams,
+  PagedResult,
 } from '@/types'
 
 const api = axios.create({
@@ -36,8 +38,20 @@ export const login = (data: LoginRequest) =>
   api.post<LoginResponse>('/auth/login', data).then((r) => r.data)
 
 // Requests
-export const getRequests = (status?: string) =>
-  api.get<Request[]>('/requests', { params: { status } }).then((r) => r.data)
+export const getRequests = (params: FetchRequestsParams = {}) =>
+  api.get<PagedResult<Request>>('/requests', {
+    params: {
+      ...(params.status     && { status: params.status }),
+      ...(params.operatorId && { operatorId: params.operatorId }),
+      ...(params.driverId   && { driverId: params.driverId }),
+      ...(params.dateFrom   && { dateFrom: params.dateFrom }),
+      ...(params.dateTo     && { dateTo: params.dateTo }),
+      sortBy:   params.sortBy   ?? 'createdAt',
+      sortDesc: params.sortDesc ?? true,
+      page:     params.page     ?? 1,
+      pageSize: 50,
+    },
+  }).then((r) => r.data)
 
 export const getRequest = (id: number) =>
   api.get<RequestDetail>(`/requests/${id}`).then((r) => r.data)

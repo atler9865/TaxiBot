@@ -252,6 +252,7 @@ public class BotService(
         var isNew = user.Id == 0;
         user.FirstName = session.TempFirstName ?? "User";
         user.LastName = lastName.Trim();
+        user.FullName = $"{user.FirstName} {user.LastName}";
         user.Language = session.TempLanguage;
         user.IsRegistered = true;
         user.RegisteredAt = DateTime.UtcNow;

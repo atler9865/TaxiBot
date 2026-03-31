@@ -16,6 +16,28 @@ public record UpdateUserRequest(string Login, string FirstName, string LastName,
 
 // ── Requests ──────────────────────────────────────────────────────────────────
 
+public class RequestsQuery
+{
+    public string? Status { get; set; }
+    public int? OperatorId { get; set; }
+    public int? DriverId { get; set; }
+    public DateTime? DateFrom { get; set; }
+    public DateTime? DateTo { get; set; }
+    public string SortBy { get; set; } = "createdAt";
+    public bool SortDesc { get; set; } = true;
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 50;
+}
+
+public class PagedResult<T>
+{
+    public List<T> Items { get; init; } = [];
+    public int TotalCount { get; init; }
+    public int Page { get; init; }
+    public int PageSize { get; init; }
+    public int TotalPages { get; init; }
+}
+
 public class RequestDto
 {
     public int Id { get; init; }

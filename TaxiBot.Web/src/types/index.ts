@@ -13,6 +13,27 @@ export interface Operator {
 
 export type RequestStatus = 'New' | 'InProgress' | 'Completed'
 
+export type SortBy = 'createdAt' | 'assignedAt' | 'completedAt' | 'driverName' | 'operatorName'
+
+export interface FetchRequestsParams {
+  status?: RequestStatus
+  page?: number
+  operatorId?: number
+  driverId?: number
+  dateFrom?: string
+  dateTo?: string
+  sortBy?: SortBy
+  sortDesc?: boolean
+}
+
+export interface PagedResult<T> {
+  items: T[]
+  totalCount: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
 export interface Request {
   id: number
   problemType: string
