@@ -8,11 +8,11 @@ public record LoginResponse(string Token, OperatorDto Operator);
 
 // ── Operators ─────────────────────────────────────────────────────────────────
 
-public record OperatorDto(int Id, string Login, string FirstName, string LastName, bool IsAvailable, string Role);
+public record OperatorDto(int Id, string Login, string FirstName, string LastName, string Status, string Role);
 
 public record CreateUserRequest(string Login, string Password, string FirstName, string LastName, string Role);
 
-public record UpdateUserRequest(string Login, string FirstName, string LastName, string Role, string? Password);
+public record UpdateUserRequest(string Login, string FirstName, string LastName, string Role, string Status, string? Password);
 
 // ── Requests ──────────────────────────────────────────────────────────────────
 

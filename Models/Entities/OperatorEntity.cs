@@ -9,7 +9,7 @@ public class AppUser
     public string PasswordHash { get; set; } = "";
     public string FirstName { get; set; } = "";
     public string LastName { get; set; } = "";
-    public bool IsAvailable { get; set; } = true;
+    public UserStatus Status { get; set; } = UserStatus.Available;
     public OperatorRole Role { get; set; } = OperatorRole.Operator;
     public DateTime RegisteredAt { get; set; }
 

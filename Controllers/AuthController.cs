@@ -32,7 +32,7 @@ public class AuthController(AppDbContext db, IConfiguration config) : Controller
             return Unauthorized(new { message = "Invalid credentials" });
 
         var token = GenerateJwt(op);
-        var dto = new OperatorDto(op.Id, op.Login, op.FirstName, op.LastName, op.IsAvailable, op.Role.ToString());
+        var dto = new OperatorDto(op.Id, op.Login, op.FirstName, op.LastName, op.Status.ToString(), op.Role.ToString());
 
         return Ok(new LoginResponse(token, dto));
     }

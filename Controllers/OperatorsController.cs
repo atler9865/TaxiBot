@@ -19,7 +19,7 @@ public class OperatorsController(AppDbContext db) : ControllerBase
     {
         var operators = await db.AppUsers
             .OrderBy(o => o.FirstName)
-            .Select(o => new OperatorDto(o.Id, o.Login, o.FirstName, o.LastName, o.IsAvailable, o.Role.ToString()))
+            .Select(o => new OperatorDto(o.Id, o.Login, o.FirstName, o.LastName, o.Status.ToString(), o.Role.ToString()))
             .ToListAsync(ct);
 
         return Ok(operators);
@@ -40,7 +40,7 @@ public class OperatorsController(AppDbContext db) : ControllerBase
             Login = request.Login,
             FirstName = request.FirstName,
             LastName = request.LastName,
-            IsAvailable = true,
+            Status = UserStatus.Available,
             Role = role,
             RegisteredAt = DateTime.UtcNow
         };
@@ -51,7 +51,7 @@ public class OperatorsController(AppDbContext db) : ControllerBase
         db.AppUsers.Add(user);
         await db.SaveChangesAsync(ct);
 
-        return Ok(new OperatorDto(user.Id, user.Login, user.FirstName, user.LastName, user.IsAvailable, user.Role.ToString()));
+        return Ok(new OperatorDto(user.Id, user.Login, user.FirstName, user.LastName, user.Status.ToString(), user.Role.ToString()));
     }
 
     [HttpPut("{id:int}")]
@@ -67,10 +67,14 @@ public class OperatorsController(AppDbContext db) : ControllerBase
         if (!Enum.TryParse<OperatorRole>(request.Role, out var role))
             return BadRequest(new { message = "Invalid role" });
 
+        if (!Enum.TryParse<UserStatus>(request.Status, out var status))
+            return BadRequest(new { message = "Invalid status" });
+
         user.Login = request.Login;
         user.FirstName = request.FirstName;
         user.LastName = request.LastName;
         user.Role = role;
+        user.Status = status;
 
         if (!string.IsNullOrWhiteSpace(request.Password))
         {
@@ -80,6 +84,6 @@ public class OperatorsController(AppDbContext db) : ControllerBase
 
         await db.SaveChangesAsync(ct);
 
-        return Ok(new OperatorDto(user.Id, user.Login, user.FirstName, user.LastName, user.IsAvailable, user.Role.ToString()));
+        return Ok(new OperatorDto(user.Id, user.Login, user.FirstName, user.LastName, user.Status.ToString(), user.Role.ToString()));
     }
 }

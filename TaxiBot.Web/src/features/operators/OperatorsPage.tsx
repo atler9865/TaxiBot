@@ -3,7 +3,24 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { fetchOperators } from './operatorsSlice'
 import AddUserModal from './AddUserModal'
 import EditUserModal from './EditUserModal'
-import type { Operator } from '@/types'
+import type { Operator, UserStatus } from '@/types'
+
+const STATUS_STYLES: Record<UserStatus, { dot: string; badge: string; label: string }> = {
+  Available:    { dot: 'bg-green-500',  badge: 'bg-green-50 text-green-700',   label: 'Available' },
+  NotAvailable: { dot: 'bg-gray-400',   badge: 'bg-gray-100 text-gray-500',    label: 'Not Available' },
+  Blocked:      { dot: 'bg-red-500',    badge: 'bg-red-50 text-red-700',       label: 'Blocked' },
+  InVacation:   { dot: 'bg-yellow-400', badge: 'bg-yellow-50 text-yellow-700', label: 'On Vacation' },
+}
+
+function StatusBadge({ status }: { status: UserStatus }) {
+  const s = STATUS_STYLES[status] ?? STATUS_STYLES.NotAvailable
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${s.badge}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+      {s.label}
+    </span>
+  )
+}
 
 function RowMenu({ operator, onEdit }: { operator: Operator; onEdit: (op: Operator) => void }) {
   const [pos, setPos] = useState<{ top: number; right: number } | null>(null)
@@ -126,14 +143,7 @@ export default function UsersPage() {
                   </span>
                 </td>
                 <td className="px-6 py-3">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                    op.isAvailable
-                      ? 'bg-green-50 text-green-700'
-                      : 'bg-gray-100 text-gray-500'
-                  }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${op.isAvailable ? 'bg-green-500' : 'bg-gray-400'}`} />
-                    {op.isAvailable ? 'Available' : 'Busy'}
-                  </span>
+                  <StatusBadge status={op.status} />
                 </td>
                 <td className="px-6 py-3 text-right">
                   <RowMenu operator={op} onEdit={setEditOperator} />

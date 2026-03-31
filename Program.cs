@@ -124,7 +124,7 @@ static async Task SeedAdminAsync(AppDbContext db, IConfiguration config)
         Login = login,
         FirstName = firstName,
         LastName = lastName,
-        IsAvailable = true,
+        Status = UserStatus.Available,
         Role = OperatorRole.Administrator,
         RegisteredAt = DateTime.UtcNow
     };

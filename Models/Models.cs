@@ -6,6 +6,14 @@ public enum OperatorRole
     Administrator = 2
 }
 
+public enum UserStatus
+{
+    Available = 1,
+    NotAvailable = 2,
+    Blocked = 3,
+    InVacation = 4
+}
+
 public enum UserState
 {
     WaitingForLanguage,

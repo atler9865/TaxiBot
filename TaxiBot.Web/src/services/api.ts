@@ -71,6 +71,7 @@ export const updateOperator = (id: number, data: {
   firstName: string
   lastName: string
   role: string
+  status: string
   password?: string
 }) => api.put<Operator>(`/operators/${id}`, data).then((r) => r.data)
 

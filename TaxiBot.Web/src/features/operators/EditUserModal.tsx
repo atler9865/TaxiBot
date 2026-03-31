@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { updateUserThunk, clearUpdateError } from './operatorsSlice'
-import type { Operator, OperatorRole } from '@/types'
+import type { Operator, OperatorRole, UserStatus } from '@/types'
 
 interface Props {
   operator: Operator
@@ -16,6 +16,7 @@ export default function EditUserModal({ operator, onClose }: Props) {
     firstName: operator.firstName,
     lastName: operator.lastName,
     role: operator.role as OperatorRole,
+    status: operator.status as UserStatus,
     password: '',
   })
 
@@ -33,6 +34,7 @@ export default function EditUserModal({ operator, onClose }: Props) {
       firstName: form.firstName,
       lastName: form.lastName,
       role: form.role,
+      status: form.status,
       ...(form.password ? { password: form.password } : {}),
     }
     const result = await dispatch(updateUserThunk({ id: operator.id, data: payload }))
@@ -100,16 +102,31 @@ export default function EditUserModal({ operator, onClose }: Props) {
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Role</label>
-            <select
-              value={form.role}
-              onChange={set('role')}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              <option value="Operator">Operator</option>
-              <option value="Administrator">Administrator</option>
-            </select>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Role</label>
+              <select
+                value={form.role}
+                onChange={set('role')}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                <option value="Operator">Operator</option>
+                <option value="Administrator">Administrator</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Status</label>
+              <select
+                value={form.status}
+                onChange={set('status')}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                <option value="Available">Available</option>
+                <option value="NotAvailable">Not Available</option>
+                <option value="Blocked">Blocked</option>
+                <option value="InVacation">On Vacation</option>
+              </select>
+            </div>
           </div>
 
           {updateError && (

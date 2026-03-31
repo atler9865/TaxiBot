@@ -1,11 +1,13 @@
 export type OperatorRole = 'Operator' | 'Administrator'
 
+export type UserStatus = 'Available' | 'NotAvailable' | 'Blocked' | 'InVacation'
+
 export interface Operator {
   id: number
   login: string
   firstName: string
   lastName: string
-  isAvailable: boolean
+  status: UserStatus
   role: OperatorRole
 }
 

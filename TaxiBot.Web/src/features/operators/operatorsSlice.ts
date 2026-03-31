@@ -43,7 +43,7 @@ export const createUserThunk = createAsyncThunk(
 export const updateUserThunk = createAsyncThunk(
   'operators/update',
   async (
-    { id, data }: { id: number; data: { login: string; firstName: string; lastName: string; role: OperatorRole; password?: string } },
+    { id, data }: { id: number; data: { login: string; firstName: string; lastName: string; role: OperatorRole; status: string; password?: string } },
     { rejectWithValue }
   ) => {
     try {
