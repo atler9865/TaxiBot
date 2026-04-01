@@ -38,6 +38,8 @@ public class BotService(
         var me = await bot.GetMe(ct);
         logger.LogInformation("Bot @{Username} started", me.Username);
 
+        await SetCommandMenuAsync(ct);
+
         await Task.Delay(Timeout.Infinite, ct);
     }
 
@@ -417,6 +419,50 @@ public class BotService(
 
     private string LocProblem(ProblemType problem, string lang)
         => Loc(lang, $"Problem{problem.ToDisplayName()}");
+
+    private async Task SetCommandMenuAsync(CancellationToken ct)
+    {
+        var commandsByLang = new Dictionary<string, BotCommand[]>
+        {
+            ["uk"] =
+            [
+                new BotCommand { Command = "start", Description = "🏠 Головне меню" },
+                new BotCommand { Command = "language", Description = "🌐 Змінити мову" }
+            ],
+            ["en"] =
+            [
+                new BotCommand { Command = "start", Description = "🏠 Main menu" },
+                new BotCommand { Command = "language", Description = "🌐 Change language" }
+            ],
+            ["pl"] =
+            [
+                new BotCommand { Command = "start", Description = "🏠 Menu główne" },
+                new BotCommand { Command = "language", Description = "🌐 Zmień język" }
+            ],
+            ["ru"] =
+            [
+                new BotCommand { Command = "start", Description = "🏠 Главное меню" },
+                new BotCommand { Command = "language", Description = "🌐 Изменить язык" }
+            ]
+        };
+
+        foreach (var (lang, commands) in commandsByLang)
+        {
+            await bot.SetMyCommands(
+                commands: commands,
+                scope: new BotCommandScopeDefault(),
+                languageCode: lang,
+                cancellationToken: ct);
+        }
+
+        // Fallback for users without a detected language
+        await bot.SetMyCommands(
+            commands: commandsByLang["uk"],
+            scope: new BotCommandScopeDefault(),
+            cancellationToken: ct);
+
+        logger.LogInformation("Bot command menu set");
+    }
 
     private Task HandleErrorAsync(ITelegramBotClient _, Exception ex, HandleErrorSource source, CancellationToken ct)
     {
